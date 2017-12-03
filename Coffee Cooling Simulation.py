@@ -18,14 +18,18 @@ import numpy as np
 
 """Constants Setting"""
 a =  float(0) # lower bound of Integration
-b = float(100) # upper bound of Integration
-N = float(10) # number of segments
-h = b - a # length of interval
-dt = .1 #h/N <-- use this if you want to specify in terms of number of divisions
+b = float(10) # upper bound of Integration
+dt = .001 #h/N <-- use this if you want to specify in terms of number of divisions
+h = a-b
+N = h/dt
 tList = np.arange(a,b+dt,dt) # list of values of t spaced by dt
 r = 0.1 #coeffecient for how fast coffee cools
 T_s = 17 #surrounding temperature
 T_0 = 90. #Initial Temperature
+dt_range1 = np.arange(0.0001,0.1,0.0001)
+dt_range = np.logspace(0.0001,0.1,1000)
+dt_values = [0.1,0.05,0.025,0.01,0.005,0.0025,0.001] #range of dt values for finding error
+
 
 def function(t): # defines function that takes time in analytic function
   return float(T_s-(T_s-T_0)*np.exp(-r*t)) # returns arguemnt through function
@@ -39,29 +43,37 @@ def AnalyticFunction(): #makes list straight from function
         l.append(float(function(i))) #adds function(i) to the list l as an integer
     return l # returns newly made function l
 
-def SimpleEulerMethod(): #simple Euler method with c as initial condition for the start of list
+def SimpleEulerMethod(dt): #simple Euler method with c as initial condition for the start of list
   l = [] # makes empty list
   yi = function(a) # initial condition is set to boundary condition through function
+  tList = np.arange(a,b+dt,dt)
   for i in tList: #makes y values fo the corresponding t values
     l.append(yi) #add new yi to list l
     yi += dt*functionDerivitive(yi,i)
-  return l
+  return l[-1]
 
-def ImprovedEulerMethod(): #simple Euler method with c as initial condition for the start of list
+def ImprovedEulerMethod(dt): #simple Euler method with c as initial condition for the start of list
   l = [] # makes empty list
   yi = function(a) # initial condition is set to boundary condition through function
+  tList = np.arange(a,b+dt,dt)
   for i in tList: #makes y values fo the corresponding t values
     l.append(yi) #add new yi to list l
     yi += dt*(0.5)*(functionDerivitive(yi,i)+functionDerivitive(yi+dt*functionDerivitive(yi,i),i+dt))
-  return l
+  return l[-1]
+
+true_analytic_value = AnalyticFunction()[-1]
+ApproxValues = []
+for i in dt_range1:
+    ApproxValues.append(ImprovedEulerMethod(i))
+
+plt.scatter(dt_range1,ApproxValues,marker='^',color='g')
+
+ApproxValues = []
+for i in dt_values:
+    ApproxValues.append(ImprovedEulerMethod(i))
+
+plt.scatter(dt_values,ApproxValues,marker='o',color='b',s=100)
 
 
-plt.plot(tList, AnalyticFunction(),color="blue", linewidth=5, linestyle="--", label="Analytic")
-plt.plot(tList,ImprovedEulerMethod(),color="red", linewidth=3, linestyle="-", label="Improved Euler Method")
-plt.plot(tList,SimpleEulerMethod(),color="green", linewidth=1, linestyle="-", label="Simple Euler Method")
-plt.xlabel('Time (mins)')
-plt.ylabel('Temperature (C)')
-plt.grid(True)
-plt.plot([a, b], [T_s, T_s], color='k', linestyle='-', linewidth=2, label = "Surroundings Temperature")
-plt.legend(loc='upper right', frameon=True, prop={'size': 15})
+
 plt.savefig('graph.png')
