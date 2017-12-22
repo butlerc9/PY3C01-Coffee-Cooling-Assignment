@@ -7,7 +7,7 @@ from matplotlib.ticker import LinearLocator, FormatStrFormatter
 fig = plt.figure() #starts new figure
 ax = fig.add_subplot(111, projection='3d')
 
-T0_Values = np.arange(22., 100., .5)
+T0_Values = np.arange(17., 100., .5)
 TD_Values = np.arange(17., 95., .5)
 
 x, y = np.meshgrid(T0_Values, TD_Values) #creates a matrix
